@@ -11,6 +11,8 @@
 (function() {
     'use strict';
 
+    const clueRegex = /^\d+-(across|down)-crosswords\/quick\/\d+$/;
+
     let interval = setInterval(function () {
         if (isReady()) {
            clearInterval(interval);
@@ -20,7 +22,9 @@
     }, 100)
 
     function isReady() {
-        const el = document.querySelector('.crossword__clue__text')
+        const el = [...document.querySelectorAll("div")].find(div =>
+            clueRegex.test(div.id)
+        );
         return el != null && el.textContent != null && el.textContent.length != null && el.textContent.length > 0
     }
 
@@ -33,16 +37,31 @@
             hideAllCluesExceptSelected()
         })
 
-        document.querySelector('.crossword__clue').click()
+        const firstClue = [...document.querySelectorAll("div")].find(div =>
+            clueRegex.test(div.id)
+        );
+        firstClue.click()
     }
 
 
     function hideAllCluesExceptSelected() {
-        document.querySelectorAll('.crossword__clue:not(.crossword__clue--selected)').forEach(el => {
-            el.style = 'display:none'
-        })
-        document.querySelectorAll('.crossword__clue--selected').forEach(el => {
-            el.style = 'display:block'
-        })
+        document.querySelectorAll('div[data-link-name="Crosswords"] div').forEach(el => {
+            if (clueRegex.test(el.id)) {
+                const isSelected = el.getAttribute("aria-selected") === "true";
+
+                if (isSelected) {
+                    // Show the spans for the selected clue
+                    el.querySelectorAll("span").forEach(span => {
+                        span.style.display = "";
+                    });
+                } else {
+                    // Hide the second <span> for non-selected clues
+                    const secondSpan = el.querySelectorAll("span")[1];
+                    if (secondSpan) {
+                        secondSpan.style.display = "none";
+                    }
+                }
+            }
+        });
     }
 })();
